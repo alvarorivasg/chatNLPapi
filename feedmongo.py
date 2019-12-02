@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from organizemongo import connectCollection
+from fn import connectCollection
 import getpass
 import json
 

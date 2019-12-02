@@ -1,23 +1,25 @@
 from bottle import route, run, get, post, request
 import random
-from organizemongo import connectCollection, getPolarity
+from fn import connectCollection, getPolarity
 from bson.json_util import dumps
 import json
 from pymongo import MongoClient
-import getpass
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-
-password = getpass.getpass("Insert your AtlasMongoDB alvaro password: ")
-connection = "mongodb+srv://alvaro:{}@apiproject-6gblk.mongodb.net/test?retryWrites=true&w=majority".format(
-    password)
+connection = os.getenv('CONNECTIONMONGO')
 client = MongoClient(connection)
 db, messages = connectCollection('chatNLPapi', 'messages', client)
 _, users = connectCollection('chatNLPapi', 'users', client)
 _, chats = connectCollection('chatNLPapi', 'chats', client)
 
 
-'''class CollConection:
+'''
+Pa futuras actualizaciones: montar esto como clase y en las funciones decoradas llamar a métodos de la clase
+
+class CollConnection:
 
     def __init__(self,dbName,collection):
         self.client = MongoClient()
@@ -121,5 +123,5 @@ def anChat(idChat):
     return dumps(rtrn)
 
 
-# _, coll=creaclass('Prueba','datamad1019')esto solo era necesario si finalmente hago class
+# _, coll=collConnection('Prueba','datamad1019')esto solo era necesario si finalmente hago class
 run(host='0.0.0.0', port=8080)
