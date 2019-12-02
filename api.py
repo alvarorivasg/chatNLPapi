@@ -1,7 +1,8 @@
 from bottle import route, run, get, post, request
 import random
-from organizemongo import connectCollection
+from organizemongo import connectCollection, getPolarity
 from bson.json_util import dumps
+import json
 from pymongo import MongoClient
 import getpass
 from datetime import datetime
@@ -103,5 +104,22 @@ def createMessage():
     messages.insert_one(rtrn)
     return dumps(rtrn)
 
-# _, coll=creaclass('Prueba','datamad1019')esto solo era necesario si hago class
+@get('/analyze/<idChat>')
+def anChat(idChat):
+    '''Analiza con la librería Flair la emotividad de un chat concreto'''
+    chat=json.loads(getChat(idChat))
+    pols=[]
+    for mes in chat:
+        y=getPolarity(chat[mes][1])
+        pols.append(y)
+    cleanpols=list(map(lambda e: float(str(e)[11:-2]) if str(e)[1:4]=='POS' else float('-'+str(e)[11:-2]),pols))
+    nicemen=cleanpols.index(max(cleanpols))
+    badmen=cleanpols.index(min(cleanpols))
+    rtrn={'Best vibing message': chat[list(chat.keys())[nicemen]][1],
+    'Worst vibing message': chat[list(chat.keys())[badmen]][1],
+    'Average polarity': sum(cleanpols)/len(cleanpols)}
+    return dumps(rtrn)
+
+
+# _, coll=creaclass('Prueba','datamad1019')esto solo era necesario si finalmente hago class
 run(host='0.0.0.0', port=8080)
