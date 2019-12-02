@@ -1,12 +1,16 @@
-from bottle import route, run, get, post, request
+from bottle import route, run, get, post, request, HTTPResponse
 import random
-from fn import connectCollection, getPolarity
+from fn import connectCollection,getPolarity
 from bson.json_util import dumps
 import json
 from pymongo import MongoClient
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity as distance
+import pandas as pd
 load_dotenv()
 
 connection = os.getenv('CONNECTIONMONGO')
@@ -108,7 +112,9 @@ def createMessage():
 
 @get('/analyze/<idChat>')
 def anChat(idChat):
-    '''Analiza con la librería Flair la emotividad de un chat concreto'''
+    data=list(chats.find({}))
+    if str(idChat) not in list(set([str(ch['idChat']) for ch in data])):
+        return HTTPResponse(status=200, body=json.dumps({'Message':'Chat ID not valid. Please try again'}))
     chat=json.loads(getChat(idChat))
     pols=[]
     for mes in chat:
@@ -122,6 +128,31 @@ def anChat(idChat):
     'Average polarity': sum(cleanpols)/len(cleanpols)}
     return dumps(rtrn)
 
+@get("/recommend/<userName>")
+def recommend(userName):
+    data=list(messages.find({}))
+    if userName not in list(set([us['userName'] for us in data])):
+        return HTTPResponse(status=200, body=json.dumps({'Message':'User not valid. Please try again'}))
+    words={}
+    for men in data:
+        if men['userName'] not in words.keys():
+            words[men['userName']]=men['text']
+        else:
+            words[men['userName']]=words[men['userName']]+men['text']
+    count_vectorizer = CountVectorizer(stop_words='english')
+    sparse_matrix = count_vectorizer.fit_transform(words.values())
+    words_matrix = sparse_matrix.todense()
+    df = pd.DataFrame(words_matrix, columns=count_vectorizer.get_feature_names(), index=words.keys())
+    similarity_matrix = distance(df, df)
+    sim_df = pd.DataFrame(similarity_matrix, columns=words.keys(), index=words.keys())
+    rtrn={f'Most similar users to {userName}': list(sim_df[userName].sort_values(ascending=False)[1:4].keys())}
+    return dumps(rtrn)
+
+
+
 
 # _, coll=collConnection('Prueba','datamad1019')esto solo era necesario si finalmente hago class
-run(host='0.0.0.0', port=8080)
+port = int(os.getenv("PORT", 8080))
+print(f"Running server {port}....")
+
+run(host="0.0.0.0", port=port, debug=True)
