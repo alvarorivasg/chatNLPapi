@@ -2,7 +2,7 @@
 
 This is the story of a failure...
 
-I created an API that uses a pre-built NLP model from Flair library to process messages from a MongoDB Atlas database, filled with fake chats. I really enjoyed comparing pre-built NLP models from different libraries, as my goal is to gain experience on this topic as soon as I take my first bites of the ML pizza (happily, it is gonna happen 12 hours after I finish writing this file). Yeah, my API was cool, this was quite a cool project... But then the nightmare began.
+I created an API that uses a pre-built NLP model from Flair library to process messages from a MongoDB Atlas database, filled with fake chats. I really enjoyed comparing pre-built NLP models from different libraries, as my goal is to gain experience on this topic as soon as I take my first bites of the ML pizza (happily, it is gonna happen 12 hours after I finish writing this file, thanks to Ironhack teaching staff). Yeah, my API was cool, this was quite a cool project... But then the nightmare began.
 
 I could create a Docker image of my API and have it serving from local. I even deployed it in Heroku and everything looked fine. However, dark mysteries were awaiting.
 
